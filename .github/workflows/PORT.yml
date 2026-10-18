@@ -60,37 +60,20 @@ jobs:
           echo "::group::Downloading ROM"
           mkdir -p "$DEST_DIR"
           if [[ "$ROM_URL" == *"gofile.io/d/"* ]]; then
-            CONTENT_ID=$(echo "$ROM_URL" | awk -F'/d/' '{print $2}' | cut -d'/' -f1 | cut -d'?' -f1)
-            TOKEN=$(curl -s -X POST "https://api.gofile.io/accounts" | jq -r '.data.token')
-            if [ -z "$TOKEN" ] || [ "$TOKEN" == "null" ]; then
+            echo "Dùng yt-dlp để trích xuất link Gofile..."
+            pip3 install -U yt-dlp > /dev/null 2>&1 || true
+            DIRECT_URL=$(yt-dlp -g "$ROM_URL" 2>/dev/null | head -n 1)
+            if [ -z "$DIRECT_URL" ]; then
+              echo "::error::yt-dlp không thể giải mã link Gofile"
               exit 1
             fi
-            WT=$(curl -s "https://gofile.io/dist/js/global.js" | grep -oE 'appdata\.wt\s*=\s*"[^"]+"' | cut -d'"' -f2)
-            if [ -z "$WT" ]; then
-              WT="4fd6sg89d7s6" # Giá trị dự phòng nếu Gofile đổi cấu trúc file JS
-            fi
-            API_RES=$(curl -s "https://api.gofile.io/contents/$CONTENT_ID?wt=$WT" \
-              -H "Authorization: Bearer $TOKEN")
-            STATUS=$(echo "$API_RES" | jq -r '.status')
-            if [ "$STATUS" != "ok" ]; then
-              echo "::error::Lỗi truy xuất API Gofile (Status: $STATUS). Kiểm tra lại link hoặc quyền riêng tư của file."
-              exit 1
-            fi
-            DIRECT_URL=$(echo "$API_RES" | jq -r '[.data.children[] | select(.name | endswith(".zip"))][0].link')
-            if [ -z "$DIRECT_URL" ] || [ "$DIRECT_URL" == "null" ]; then
-              echo "::error::Không tìm thấy link tải trong thư mục Gofile"
-              exit 1
-            fi
-            echo "Đã lấy được Direct Link thành công!"
-            ARIA_HEADER="--header=Cookie: accountToken=$TOKEN"
+            echo "Lấy Direct Link thành công: $DIRECT_URL"
           else
             DIRECT_URL="$ROM_URL"
-            ARIA_HEADER=""
           fi
           timeout 9000 aria2c \
             -s16 -x16 -j"$(nproc)" -c \
-            -U "Mozilla/5.0" \
-            ${ARIA_HEADER:+"$ARIA_HEADER"} \
+            -U "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
             --console-log-level=warn \
             -d "$DEST_DIR" \
             -o "${RYU_NAME}.zip" \
@@ -98,7 +81,7 @@ jobs:
             || { echo "::error::ROM download failed"; exit 1; }
           echo "::endgroup::"
           [ -s "$DEST_DIR/${RYU_NAME}.zip" ] && [ $(stat -c%s "$DEST_DIR/${RYU_NAME}.zip") -gt 1048576 ] \
-            || { echo "::error::Downloaded ROM is missing, empty, or invalid HTML page"; exit 1; }
+            || { echo "::error::Downloaded ROM is missing, empty, or invalid"; exit 1; }
           echo "Download complete: $(du -h "$DEST_DIR/${RYU_NAME}.zip" | cut -f1)"
       - name: Clone RYU AUTO BUILD sources
         run: |
