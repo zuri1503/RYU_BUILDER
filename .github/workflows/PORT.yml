@@ -1,0 +1,116 @@
+name: RYU BUILDER PORT
+on:
+  workflow_dispatch:
+    inputs:
+      URL:
+        description: "EROFS IMAGES ZIP URL"
+        required: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ROM_URL: ${{ github.event.inputs.URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check free disk space
+        id: diskcheck
+        run: |
+          FREE_GB=$(df -BG / | awk 'NR==2 {gsub("G","",$4); print $4}')
+          echo "Free disk space: ${FREE_GB}GB"
+          echo "need_cleanup=$( [ "$FREE_GB" -lt 50 ] && echo true || echo false )" >> $GITHUB_OUTPUT
+      - name: Maximize build disk space
+        if: steps.diskcheck.outputs.need_cleanup == 'true'
+        uses: AdityaGarg8/remove-unwanted-software@v5
+        with:
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
+          remove-large-packages: 'true'
+          remove-cached-tools: 'true'
+      - name: Start SSH Agent & Add Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PRIVATE_REPO_KEY }}" | base64 -d > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - name: Setup build environment
+        run: |
+          sudo timedatectl set-timezone UTC
+          sudo apt-get update -qq
+          sudo apt-get install -y aria2 \
+            openjdk-17-jdk-headless \
+            openssh-client p7zip-full \
+            python3 python-is-python3 python3-pip \
+            zip zipalign > /dev/null 2>&1
+          sudo pip install --quiet lz4 zstandard \
+            google-api-python-client \
+            google-auth-httplib2 \
+            google-auth-oauthlib > /dev/null 2>&1
+          DATE=$(TZ=UTC date +"%y%m%d")
+          RYU_NAME="RYUOS_PORT_$DATE"
+          echo "RYU_NAME=$RYU_NAME" >> $GITHUB_ENV
+      - name: Download ROM files
+        run: |
+          DEST_DIR="$GITHUB_WORKSPACE/ROM"
+          echo "::group::Downloading ROM"
+          mkdir -p "$DEST_DIR"
+          if [[ "$ROM_URL" == *"gofile.io/d/"* ]]; then
+            CONTENT_ID=$(echo "$ROM_URL" | awk -F'/d/' '{print $2}' | cut -d'/' -f1 | cut -d'?' -f1)
+            TOKEN=$(curl -s -X POST "https://api.gofile.io/accounts" | jq -r '.data.token')
+            if [ -z "$TOKEN" ] || [ "$TOKEN" == "null" ]; then
+              exit 1
+            fi
+            WT=$(curl -s "https://gofile.io/dist/js/global.js" | grep -oE 'appdata\.wt\s*=\s*"[^"]+"' | cut -d'"' -f2)
+            if [ -z "$WT" ]; then
+              WT="4fd6sg89d7s6" # Giá trị dự phòng nếu Gofile đổi cấu trúc file JS
+            fi
+            API_RES=$(curl -s "https://api.gofile.io/contents/$CONTENT_ID?wt=$WT" \
+              -H "Authorization: Bearer $TOKEN")
+            STATUS=$(echo "$API_RES" | jq -r '.status')
+            if [ "$STATUS" != "ok" ]; then
+              echo "::error::Lỗi truy xuất API Gofile (Status: $STATUS). Kiểm tra lại link hoặc quyền riêng tư của file."
+              exit 1
+            fi
+            DIRECT_URL=$(echo "$API_RES" | jq -r '[.data.children[] | select(.name | endswith(".zip"))][0].link')
+            if [ -z "$DIRECT_URL" ] || [ "$DIRECT_URL" == "null" ]; then
+              echo "::error::Không tìm thấy link tải trong thư mục Gofile"
+              exit 1
+            fi
+            echo "Đã lấy được Direct Link thành công!"
+            ARIA_HEADER="--header=Cookie: accountToken=$TOKEN"
+          else
+            DIRECT_URL="$ROM_URL"
+            ARIA_HEADER=""
+          fi
+          timeout 9000 aria2c \
+            -s16 -x16 -j"$(nproc)" -c \
+            -U "Mozilla/5.0" \
+            ${ARIA_HEADER:+"$ARIA_HEADER"} \
+            --console-log-level=warn \
+            -d "$DEST_DIR" \
+            -o "${RYU_NAME}.zip" \
+            "$DIRECT_URL" \
+            || { echo "::error::ROM download failed"; exit 1; }
+          echo "::endgroup::"
+          [ -s "$DEST_DIR/${RYU_NAME}.zip" ] && [ $(stat -c%s "$DEST_DIR/${RYU_NAME}.zip") -gt 1048576 ] \
+            || { echo "::error::Downloaded ROM is missing, empty, or invalid HTML page"; exit 1; }
+          echo "Download complete: $(du -h "$DEST_DIR/${RYU_NAME}.zip" | cut -f1)"
+      - name: Clone RYU AUTO BUILD sources
+        run: |
+          RYU_HOME="/home/runner/work/RYU_BUILD/RYU_BUILD"
+          echo "RYU_HOME=$RYU_HOME" >> $GITHUB_ENV
+          git clone -b stock --depth=1 git@github.com:zuri1503/RYU_BUILD.git "$RYU_HOME"
+          mv -f "$GITHUB_WORKSPACE/ROM" "$RYU_HOME/ROM"
+          sudo chmod -R +x "$RYU_HOME"
+      - name: Build ProjectRYU ROM
+        run: |
+          sudo bash "$RYU_HOME/build.sh" "$GITHUB_ENV" "$RYU_NAME"
+      - name: Upload ROM to Clouds
+        run: |
+          curl -u ":${{ secrets.PIXELDRAIN_API }}" -X PUT -T "$ROM_OUTPUT" "https://pixeldrain.com/api/file/${RYU_NAME}.zip"
+          rm -f key token.pickle upload.py
