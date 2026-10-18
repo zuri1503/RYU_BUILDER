@@ -59,15 +59,15 @@ jobs:
           DEST_DIR="$GITHUB_WORKSPACE/ROM"
           echo "::group::Downloading ROM"
           mkdir -p "$DEST_DIR"
-          if [[ "$ROM_URL" == *"gofile.io/d/"* ]]; then
-            echo "Dùng yt-dlp để trích xuất link Gofile..."
-            pip3 install -U yt-dlp > /dev/null 2>&1 || true
-            DIRECT_URL=$(yt-dlp -g "$ROM_URL" 2>/dev/null | head -n 1)
-            if [ -z "$DIRECT_URL" ]; then
-              echo "::error::yt-dlp không thể giải mã link Gofile"
+          if [[ "$ROM_URL" == *"pixeldrain.com"* ]]; then
+            echo "Phát hiện link PixelDrain, đang tạo Direct Download URL..."
+            FILE_ID=$(echo "$ROM_URL" | sed -E 's|.*/(u\|file)/||' | cut -d'?' -f1 | cut -d'/' -f1)           
+            if [ -z "$FILE_ID" ]; then
+              echo "::error::Không thể trích xuất ID từ link PixelDrain: $ROM_URL"
               exit 1
             fi
-            echo "Lấy Direct Link thành công: $DIRECT_URL"
+            DIRECT_URL="https://pixeldrain.com/api/file/${FILE_ID}?download"
+            echo "Direct API URL: $DIRECT_URL"
           else
             DIRECT_URL="$ROM_URL"
           fi
