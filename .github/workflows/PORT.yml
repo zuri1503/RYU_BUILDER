@@ -49,7 +49,7 @@ jobs:
             zip zipalign > /dev/null 2>&1
           sudo pip install --quiet lz4 zstandard \
             google-api-python-client \
-            google-auth-httplib2 \
+            google-auth-httplib2 gdown \
             google-auth-oauthlib > /dev/null 2>&1
           DATE=$(TZ=UTC date +"%y%m%d")
           RYU_NAME="RYUOS_PORT_$DATE"
@@ -57,32 +57,15 @@ jobs:
       - name: Download ROM files
         run: |
           DEST_DIR="$GITHUB_WORKSPACE/ROM"
+          OUT_FILE="$DEST_DIR/${RYU_NAME}.zip"
           echo "::group::Downloading ROM"
           mkdir -p "$DEST_DIR"
-          if [[ "$ROM_URL" == *"pixeldrain.com"* ]]; then
-            echo "Phát hiện link PixelDrain, đang tạo Direct Download URL..."
-            FILE_ID=$(echo "$ROM_URL" | sed -E 's|.*/(u\|file)/||' | cut -d'?' -f1 | cut -d'/' -f1)           
-            if [ -z "$FILE_ID" ]; then
-              echo "::error::Không thể trích xuất ID từ link PixelDrain: $ROM_URL"
-              exit 1
-            fi
-            DIRECT_URL="https://pixeldrain.com/api/file/${FILE_ID}?download"
-            echo "Direct API URL: $DIRECT_URL"
-          else
-            DIRECT_URL="$ROM_URL"
-          fi
-          timeout 9000 aria2c \
-            -s16 -x16 -j"$(nproc)" -c \
-            -U "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
-            --console-log-level=warn \
-            -d "$DEST_DIR" \
-            -o "${RYU_NAME}.zip" \
-            "$DIRECT_URL" \
+          timeout 9000 gdown --fuzzy "$ROM_URL" -O "$OUT_FILE" \
             || { echo "::error::ROM download failed"; exit 1; }
           echo "::endgroup::"
-          [ -s "$DEST_DIR/${RYU_NAME}.zip" ] && [ $(stat -c%s "$DEST_DIR/${RYU_NAME}.zip") -gt 1048576 ] \
+          [ -s "$OUT_FILE" ] && [ $(stat -c%s "$OUT_FILE") -gt 1048576 ] \
             || { echo "::error::Downloaded ROM is missing, empty, or invalid"; exit 1; }
-          echo "Download complete: $(du -h "$DEST_DIR/${RYU_NAME}.zip" | cut -f1)"
+          echo "Download complete: $(du -h "$OUT_FILE" | cut -f1)"
       - name: Clone RYU AUTO BUILD sources
         run: |
           RYU_HOME="/home/runner/work/RYU_BUILD/RYU_BUILD"
