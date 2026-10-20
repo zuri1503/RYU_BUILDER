@@ -60,7 +60,7 @@ jobs:
           OUT_FILE="$DEST_DIR/${RYU_NAME}.zip"
           echo "::group::Downloading ROM"
           mkdir -p "$DEST_DIR"
-          timeout 9000 gdown --fuzzy "$ROM_URL" -O "$OUT_FILE" \
+          timeout 9000 gdown "$ROM_URL" -O "$OUT_FILE" \
             || { echo "::error::ROM download failed"; exit 1; }
           echo "::endgroup::"
           [ -s "$OUT_FILE" ] && [ $(stat -c%s "$OUT_FILE") -gt 1048576 ] \
