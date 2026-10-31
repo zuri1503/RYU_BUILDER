@@ -10,6 +10,28 @@
     "rom": "256GB / 512GB",
     "soc": "Snapdragon 8EliteGen5 V Series"
   },
+  "raphael": {
+    "battery": "4000mAh - 27W",
+    "color": "Carbon black, Flame red, Glacier blue, Summer Honey, Pearl White",
+    "device_name": "REDMI K20 Pro / XIAOMI 9T Pro",
+    "display": "AMOLED, 6.39in, 60Hz, 1080x2340",
+    "front": "20MP",
+    "ram": "6GB / 8GB",
+    "rear": "48MP + 8MP + 13MP",
+    "rom": "64GB / 256GB / 512GB",
+    "soc": "Snapdragon 855"
+  },
+  "davinci": {
+    "battery": "4000mAh - 18W",
+    "color": "Carbon black, Flame red, Glacier blue, Summer Honey, Pearl White",
+    "device_name": "REDMI K20 / XIAOMI 9T",
+    "display": "AMOLED, 6.39in, 60Hz, 1080x2340",
+    "front": "20MP",
+    "ram": "6GB / 8GB",
+    "rear": "48MP + 8MP + 13MP",
+    "rom": "64GB / 256GB / 512GB",
+    "soc": "Snapdragon 730"
+  },
   "brussels": {
     "battery": "10000mAh - 100W",
     "color": "Black, Blue, Purple, Cloud White",
