@@ -49,7 +49,7 @@ jobs:
             zip zipalign > /dev/null 2>&1
           sudo apt-get remove -y python3-requests || true
           sudo pip install --quiet --break-system-packages \
-            lz4 zstandard \
+            lz4 zstandard gdown \
             google-api-python-client \
             google-auth-httplib2 \
             google-auth-oauthlib > /dev/null 2>&1
