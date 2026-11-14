@@ -204,6 +204,10 @@ jobs:
               sf_upload "$ROM_OUTPUT" "RYU-EU/RYUOS3"
               gd_upload "125CzcpuFCY49kmJpp5ICfKKa9P8FhIel"
               ;;
+            OS4)
+              sf_upload "$ROM_OUTPUT" "RYU-EU/RYUOS4"
+              gd_upload "1Hv9Y-BbBHQFr4S9r3e7B3ofs2lZ8KP-F"
+              ;;
             *)
               echo "::warning::Unknown ROM_VER=$ROM_VER, skipping upload"
               ;;
