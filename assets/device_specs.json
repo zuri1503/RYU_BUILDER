@@ -1989,5 +1989,60 @@
     "rear": "50MP + 8MP",
     "rom": "256GB / 512GB / 1TB",
     "soc": "Snapdragon 8Gen3"
+  },
+  "shuntian": {
+    "battery": "11000mAh - 67W",
+    "color": "Gray, Silver, Green",
+    "device_name": "XIAOMI Pad 9 Pro",
+    "display": "IPS LCD, 12.5in, 144Hz, 2136x3200",
+    "front": "32MP",
+    "ram": "8GB / 12GB / 16GB",
+    "rear": "50MP",
+    "rom": "256GB / 512GB",
+    "soc": "Snapdragon 8Gen5"
+  },
+  "yingtian": {
+    "battery": "12000mAh - 120W",
+    "color": "Gray, Silver, Burgundy Red",
+    "device_name": "XIAOMI Pad 9 Pro Max",
+    "display": "IPS LCD, 13.3in, 144Hz, 2272x3408",
+    "front": "32MP",
+    "ram": "8GB / 12GB / 16GB",
+    "rear": "50MP",
+    "rom": "256GB / 512GB / 1TB",
+    "soc": "XIAOMI XRing O3"
+  },
+  "hongkong": {
+    "battery": "7000mAh - 100W",
+    "color": "Black, White, Pink, Red, Blue, Violet Red",
+    "device_name": "XIAOMI 18 Pro",
+    "display": "LTPO AMOLED, 6.4in, 120Hz, 1120x2436",
+    "front": "50MP",
+    "ram": "12GB / 16GB",
+    "rear": "200MP + 200MP + 50MP",
+    "rom": "256GB / 512GB / 1TB",
+    "soc": "Snapdragon 8EliteGen6"
+  },
+  "madrid": {
+    "battery": "8500mAh - 100W",
+    "color": "Black, White, Pink, Red, Blue, Violet Red",
+    "device_name": "XIAOMI 18 Pro Max",
+    "display": "LTPO AMOLED, 6.9in, 120Hz, 1208x2624",
+    "front": "50MP",
+    "ram": "12GB / 16GB",
+    "rear": "200MP + 200MP + 50MP",
+    "rom": "512GB / 1TB / 2TB",
+    "soc": "Snapdragon 8EliteExtremeGen6"
+  },
+  "lhasa": {
+    "battery": "6000mAh - 67W",
+    "color": "Gray, Silver, Red, Rose Gold",
+    "device_name": "XIAOMI 18 Fold",
+    "display": "Foldable LTPO AMOLED, 7.58in, 120Hz, 1672x2364",
+    "front": "16MP + 16MP",
+    "ram": "12GB / 16GB",
+    "rear": "200MP + 50MP + 50MP",
+    "rom": "256GB / 512GB / 1TB",
+    "soc": "XIAOMI XRing O3"
   }
 }
