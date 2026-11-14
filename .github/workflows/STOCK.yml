@@ -144,11 +144,25 @@ jobs:
             curl -u ":${{ secrets.PIXELDRAIN_API }}" -X PUT -T "$ROM_OUTPUT" "https://pixeldrain.com/api/file/${RYU_NAME}.zip" > /dev/null 2>&1
           }
           if [ "$IS_GLOBAL" = "true" ]; then
-            SF_PATH="RYU-MI"
-            GD_FOLDER="1xODr-0Y04OavIfSZJd7rtptOYQTpax8J"
+            case "$ROM_VER" in
+              OS3)
+                SF_PATH="RYU-MI/RYUOS3"
+                GD_FOLDER="1pmsZ38_TEBiEYeR4q11BEtCvUAypMUlK"
+              OS4)
+                SF_PATH="RYU-MI/RYUOS4"
+                GD_FOLDER="1LiqP2wamVyOk3BH3bgA8yTEb3PaDOUoO"
+                ;;
+            esac
           else
-            SF_PATH="RYU-CN"
-            GD_FOLDER="1Xq5UYwKHr4J6ad7Xef3MBpKek5yTk2cL"
+            case "$ROM_VER" in
+              OS3)
+                SF_PATH="RYU-CN/RYUOS3"
+                GD_FOLDER="1odeqyYjxGQqfeoGesMaPK2XVGJVFSNqp"
+              OS4)
+                SF_PATH="RYU-CN/RYUOS4"
+                GD_FOLDER="1JERXVioiHxcyMPaAkQRbKEVtxJlJThAC"
+                ;;
+            esac
           fi
           sf_upload "$ROM_OUTPUT" "$SF_PATH"
           gd_upload "$GD_FOLDER"
