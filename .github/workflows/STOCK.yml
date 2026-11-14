@@ -8,7 +8,7 @@ on:
       SFU:
         description: "SOURCEFORGE UPLOADER"
         type: boolean
-        default: 'true'
+        default: true
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -148,6 +148,7 @@ jobs:
               OS3)
                 SF_PATH="RYU-MI/RYUOS3"
                 GD_FOLDER="1pmsZ38_TEBiEYeR4q11BEtCvUAypMUlK"
+                ;;
               OS4)
                 SF_PATH="RYU-MI/RYUOS4"
                 GD_FOLDER="1LiqP2wamVyOk3BH3bgA8yTEb3PaDOUoO"
@@ -158,6 +159,7 @@ jobs:
               OS3)
                 SF_PATH="RYU-CN/RYUOS3"
                 GD_FOLDER="1odeqyYjxGQqfeoGesMaPK2XVGJVFSNqp"
+                ;;
               OS4)
                 SF_PATH="RYU-CN/RYUOS4"
                 GD_FOLDER="1JERXVioiHxcyMPaAkQRbKEVtxJlJThAC"
